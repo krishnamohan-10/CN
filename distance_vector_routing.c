@@ -1,39 +1,51 @@
 #include <stdio.h>
-#include <stdlib.h>
-
-#define INF 999
-
+#define INF 999  
 int main() {
-    int n; 
+    int cost[20][20], dist[20][20], via[20][20];
+    int n, i, j, k;
+    int updated;
+
+    printf("Enter the number of routers: ");
     scanf("%d", &n);
 
-    int **cost = malloc(n*sizeof(int));
-    int **dist = malloc(n*sizeof(int));
+    printf("Enter the cost matrix (use 999 for no direct link):\n");
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            scanf("%d", &cost[i][j]);
+            dist[i][j] = cost[i][j];
 
-    for(int i=0;i<n;i++){
-        cost[i]=malloc(n*sizeof(int));
-        dist[i]=malloc(n*sizeof(int));
-        for(int j=0;j<n;j++){
-            scanf("%d",&cost[i][j]);
-            dist[i][j]=cost[i][j];
+            if (i != j && cost[i][j] != INF)
+                via[i][j] = j;
+            else
+                via[i][j] = -1;
         }
     }
-
-    int changed;
     do {
-        changed = 0;
-        for(int i=0;i<n;i++)
-            for(int j=0;j<n;j++)
-                for(int k=0;k<n;k++)
-                    if(dist[i][j] > cost[i][k] + dist[k][j]) {
+        updated = 0;
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < n; j++) {
+                for (k = 0; k < n; k++) {
+                    if (dist[i][j] > cost[i][k] + dist[k][j]) {
                         dist[i][j] = cost[i][k] + dist[k][j];
-                        changed = 1;
+                        via[i][j] = k;
+                        updated = 1;
                     }
-    } while(changed);
-
-    for(int i=0;i<n;i++){
-        for(int j=0;j<n;j++)
-            printf("%d ", dist[i][j]);
-        printf("\n");
+                }
+            }
+        }
+    } while (updated);
+    printf("\nFinal Routing Tables:\n");
+    for (i = 0; i < n; i++) {
+        printf("\nRouter %d:\n", i + 1);
+        printf("Destination\tCost\tNext Hop\n");
+        for (j = 0; j < n; j++) {
+            if (i != j) {
+                if (via[i][j] != -1)
+                    printf("%d\t\t%d\t\t%d\n", j + 1, dist[i][j], via[i][j] + 1);
+                else
+                    printf("%d\t\t%d\t\t-\n", j + 1, dist[i][j]);
+            }
+        }
     }
+    return 0;
 }
